@@ -43,5 +43,20 @@ func (a *App) handleHomeGet(w http.ResponseWriter) {
 }
 
 func (a *App) handleHomePost(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
 
+	name := r.FormValue("name")
+	if name == "" {
+		name = "anon"
+	}
+
+	tmpl, err := template.ParseFiles("html/greeting.html")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	tmpl.Execute(w, name)
 }
