@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"text/template"
 )
 
 type App struct {
@@ -14,7 +15,6 @@ func main() {
 	app := App{Message: "Hello!"}
 
 	http.HandleFunc("/", app.homeHandler)
-	http.HandleFunc("/about", app.aboutHandler)
 
 	fmt.Println("Server is running on http://localhost:8080")
 	err := http.ListenAndServe(":8080", nil)
@@ -24,9 +24,24 @@ func main() {
 }
 
 func (a *App) homeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the Home Page!\n%s", a.Message)
+	method := r.Method
+	switch method {
+	case http.MethodGet:
+		a.handleHomeGet(w)
+	case http.MethodPost:
+		a.handleHomePost(w, r)
+	}
+
 }
 
-func (a *App) aboutHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "About Us: This is a simple Go web app.")
+func (a *App) handleHomeGet(w http.ResponseWriter) {
+	tmpl, err := template.ParseFiles("html/home.html")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	tmpl.Execute(w, nil)
+}
+
+func (a *App) handleHomePost(w http.ResponseWriter, r *http.Request) {
+
 }
